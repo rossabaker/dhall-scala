@@ -10,13 +10,18 @@ class PrettyPrinterSpec extends Specification with Matchers {
   "PrettyPrinter" should {
 
     "print a Record" in {
-      prettyPrint(Record(
-        Map("x" -> IntegerType, "y" -> StringType, "z" -> OptionalType)
-      )) must equalTo("{ x : Integer, y : String, z : Optional }")
+      prettyPrint(
+        Record(
+          Map("x" -> IntegerType, "y" -> StringType, "z" -> OptionalType)
+        )) must equalTo("{ x : Integer, y : String, z : Optional }")
 
-      prettyPrint(RecordLit(
-        Map("x" -> IntegerLit(0), "y" -> StringLit("text"), "z" -> OptionalLit(DoubleType, Seq(DoubleLit(1.0), DoubleLit(2.0))))
-      )) must equalTo("{x = 0, y = text, z = [1.0, 2.0] : Optional Double}")
+      prettyPrint(
+        RecordLit(
+          Map(
+            "x" -> IntegerLit(0),
+            "y" -> StringLit("text"),
+            "z" -> OptionalLit(DoubleType, Seq(DoubleLit(1.0), DoubleLit(2.0))))
+        )) must equalTo("{x = 0, y = text, z = [1.0, 2.0] : Optional Double}")
     }
 
     "print a simple lambda" in {
@@ -52,31 +57,28 @@ class PrettyPrinterSpec extends Specification with Matchers {
     }
 
     "print a Record Combine" in {
-      prettyPrint(Combine(
-        RecordLit(Map("x" -> IntegerLit(1), "y" -> StringLit("text"))),
-        RecordLit(Map("z" -> BoolLit(true))))) must equalTo("{x = 1, y = text} ∧ {z = True}")
+      prettyPrint(
+        Combine(
+          RecordLit(Map("x" -> IntegerLit(1), "y" -> StringLit("text"))),
+          RecordLit(Map("z" -> BoolLit(true))))) must equalTo("{x = 1, y = text} ∧ {z = True}")
     }
 
     "print a Let expression" in {
-      prettyPrint(Let(
-        "twice",
-        None,
-        Lam("x", StringType, StringAppend(StringLit("x"), StringLit("x"))),
-        StringLit("twice ha"))
-      ) must equalTo("let twice = λ(x : String) → x ++ x in twice ha")
+      prettyPrint(
+        Let(
+          "twice",
+          None,
+          Lam("x", StringType, StringAppend(StringLit("x"), StringLit("x"))),
+          StringLit("twice ha"))) must equalTo("let twice = λ(x : String) → x ++ x in twice ha")
     }
 
     "print a Union" in {
 
-      prettyPrint(Union(
-        Map("Left" -> StringType, "Right" -> NaturalType))
-      ) must equalTo("< Left : String | Right : Natural >")
+      prettyPrint(Union(Map("Left" -> StringType, "Right" -> NaturalType))) must equalTo(
+        "< Left : String | Right : Natural >")
 
-      prettyPrint(UnionLit(
-        "h",
-        NaturalEven,
-        Map("Left" -> StringType, "Right" -> NaturalType))
-      ) must equalTo("< h = Natural/even | Left : String | Right : Natural >")
+      prettyPrint(UnionLit("h", NaturalEven, Map("Left" -> StringType, "Right" -> NaturalType))) must equalTo(
+        "< h = Natural/even | Left : String | Right : Natural >")
     }
 
     "print a for all" in {
@@ -86,21 +88,20 @@ class PrettyPrinterSpec extends Specification with Matchers {
 
     "print a let expression" in {
       prettyPrint(Let("x", None, Var("2a", 0), Var("4x", 0))) must equalTo("let x = 2a in 4x")
-      prettyPrint(Let("x", Some(IntegerType), Var("2a", 0), Var("4x", 0))) must equalTo("let x : Integer = 2a in 4x")
+      prettyPrint(Let("x", Some(IntegerType), Var("2a", 0), Var("4x", 0))) must equalTo(
+        "let x : Integer = 2a in 4x")
     }
 
     "print a list lit" in {
       prettyPrint(ListLit(None, Seq(NaturalLit(1), NaturalLit(2)))) must equalTo("[+1, +2]")
-      prettyPrint(ListLit(Some(IntegerType), Seq(IntegerLit(1), IntegerLit(2)))) must equalTo("[1, 2] : List Integer")
+      prettyPrint(ListLit(Some(IntegerType), Seq(IntegerLit(1), IntegerLit(2)))) must equalTo(
+        "[1, 2] : List Integer")
     }
 
     "print an App" in {
-      prettyPrint(App(
-        Lam("x", Const.Type, Lam("const", IntegerType, Var("list", 0))),
-        IntegerType)
-      ) must equalTo("(λ(x : Type) → λ(const : Integer) → list) Integer")
+      prettyPrint(App(Lam("x", Const.Type, Lam("const", IntegerType, Var("list", 0))), IntegerType)) must equalTo(
+        "(λ(x : Type) → λ(const : Integer) → list) Integer")
     }
-
 
   }
 }

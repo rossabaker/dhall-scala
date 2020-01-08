@@ -18,13 +18,15 @@ class DhallParserSpec extends Specification with Matchers {
       "http url" in {
         val expression = "http://www.website.com:8080/path/to/resource?a=b&x=y#L726"
 
-        DhallParser.parse(expression).get must equalTo(Embed(Url("http://www.website.com:8080/path/to/resource?a=b&x=y#L726")))
+        DhallParser.parse(expression).get must equalTo(
+          Embed(Url("http://www.website.com:8080/path/to/resource?a=b&x=y#L726")))
       }
 
       "https url" in {
         val expression = "https://www.website.com:8080/path/to/resource?a=b&x=y#L726"
 
-        DhallParser.parse(expression).get must equalTo(Embed(Url("https://www.website.com:8080/path/to/resource?a=b&x=y#L726")))
+        DhallParser.parse(expression).get must equalTo(
+          Embed(Url("https://www.website.com:8080/path/to/resource?a=b&x=y#L726")))
       }
     }
 
@@ -55,7 +57,8 @@ class DhallParserSpec extends Specification with Matchers {
 
         val listLitExpression = s"[$envAExpression,$envBExpression ]"
 
-        DhallParser.parse(listLitExpression).get must equalTo(ListLit(None, Seq(Embed(Env("pathA")), Embed(Env("pathB")))))
+        DhallParser.parse(listLitExpression).get must equalTo(
+          ListLit(None, Seq(Embed(Env("pathA")), Embed(Env("pathB")))))
       }
 
       "parse List of environment expression and listLiteral" in {
@@ -67,7 +70,8 @@ class DhallParserSpec extends Specification with Matchers {
         val listLit = ListLit(None, Seq(Embed(Env("pathA")), Embed(Env("pathB"))))
         val envC = Embed(Env("pathC"))
 
-        DhallParser.parse(combinedListLitExpression).get must equalTo(ListLit(None, Seq(listLit, envC)))
+        DhallParser.parse(combinedListLitExpression).get must equalTo(
+          ListLit(None, Seq(listLit, envC)))
       }
     }
 
@@ -84,7 +88,11 @@ class DhallParserSpec extends Specification with Matchers {
         val expression = s"\\($label : $envAExpression) -> $listLitExpression"
 
         DhallParser.parse(expression).get must
-          equalTo(Lam(label, Embed(Env("pathA")), ListLit(None, Seq(Embed(Env("pathB")), Embed(Env("pathC"))))))
+          equalTo(
+            Lam(
+              label,
+              Embed(Env("pathA")),
+              ListLit(None, Seq(Embed(Env("pathB")), Embed(Env("pathC"))))))
       }
 
       "with λ prefix" in {
@@ -99,7 +107,11 @@ class DhallParserSpec extends Specification with Matchers {
         val expression = s"λ($label : $envAExpression) -> $listLitExpression"
 
         DhallParser.parse(expression).get must
-          equalTo(Lam(label, Embed(Env("pathA")), ListLit(None, Seq(Embed(Env("pathB")), Embed(Env("pathC"))))))
+          equalTo(
+            Lam(
+              label,
+              Embed(Env("pathA")),
+              ListLit(None, Seq(Embed(Env("pathB")), Embed(Env("pathC"))))))
       }
     }
 
@@ -116,7 +128,11 @@ class DhallParserSpec extends Specification with Matchers {
         val expression = s"forall($label:$envAExpression) -> $listLitExpression"
 
         DhallParser.parse(expression).get must
-          equalTo(Quant(label, Embed(Env("pathA")), ListLit(None, Seq(Embed(Env("pathB")), Embed(Env("pathC"))))))
+          equalTo(
+            Quant(
+              label,
+              Embed(Env("pathA")),
+              ListLit(None, Seq(Embed(Env("pathB")), Embed(Env("pathC"))))))
       }
 
       "with ∀ prefix" in {
@@ -131,7 +147,11 @@ class DhallParserSpec extends Specification with Matchers {
         val expression = s"∀($label:$envAExpression) -> $listLitExpression"
 
         DhallParser.parse(expression).get must
-          equalTo(Quant(label, Embed(Env("pathA")), ListLit(None, Seq(Embed(Env("pathB")), Embed(Env("pathC"))))))
+          equalTo(
+            Quant(
+              label,
+              Embed(Env("pathA")),
+              ListLit(None, Seq(Embed(Env("pathB")), Embed(Env("pathC"))))))
       }
     }
 
@@ -169,7 +189,8 @@ class DhallParserSpec extends Specification with Matchers {
 
         val unionExpression = s"< $envAExpression|$envBExpression>"
 
-        DhallParser.parse(unionExpression).get must equalTo(Union(Map(("a", Embed(Env("pathA"))), ("b", Embed(Env("pathB"))))))
+        DhallParser.parse(unionExpression).get must equalTo(
+          Union(Map(("a", Embed(Env("pathA"))), ("b", Embed(Env("pathB"))))))
       }
 
       "parse Union of environment expression and listLiteral" in {
@@ -181,7 +202,8 @@ class DhallParserSpec extends Specification with Matchers {
         val listLit = ListLit(None, Seq(Embed(Env("pathA")), Embed(Env("pathB"))))
         val envC = Embed(Env("pathC"))
 
-        DhallParser.parse(combinedUnionExpression).get must equalTo(Union(Map(("list", listLit), ("c", envC))))
+        DhallParser.parse(combinedUnionExpression).get must equalTo(
+          Union(Map(("list", listLit), ("c", envC))))
       }
     }
 
@@ -191,7 +213,8 @@ class DhallParserSpec extends Specification with Matchers {
           val envAExpression = "a=env:pathA"
           val unionExpression = s"< $envAExpression>"
 
-          DhallParser.parse(unionExpression).get must equalTo(UnionLit("a", Embed(Env("pathA")), Map.empty))
+          DhallParser.parse(unionExpression).get must equalTo(
+            UnionLit("a", Embed(Env("pathA")), Map.empty))
         }
 
         "with alternative types" in {
@@ -201,7 +224,11 @@ class DhallParserSpec extends Specification with Matchers {
           val unionExpression = s"< $envAExpression|$envBExpression|$envCExpression>"
 
           DhallParser.parse(unionExpression).get must
-            equalTo(UnionLit("a", Embed(Env("pathA")), Map(("b", Embed(Env("pathB"))), ("c", Embed(Env("pathC"))))))
+            equalTo(
+              UnionLit(
+                "a",
+                Embed(Env("pathA")),
+                Map(("b", Embed(Env("pathB"))), ("c", Embed(Env("pathC"))))))
 
         }
       }
@@ -227,7 +254,11 @@ class DhallParserSpec extends Specification with Matchers {
           val listLit = ListLit(None, Seq(Embed(Env("pathA"))))
 
           DhallParser.parse(unionExpression).get must
-            equalTo(UnionLit("list", listLit, Map(("b", Embed(Env("pathB"))), ("c", Embed(Env("pathC"))))))
+            equalTo(
+              UnionLit(
+                "list",
+                listLit,
+                Map(("b", Embed(Env("pathB"))), ("c", Embed(Env("pathC"))))))
         }
       }
     }

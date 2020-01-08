@@ -21,7 +21,6 @@ object PrettyPrinter {
 
   def buildExpr[S, A]: (Expr[S, A]) => String = buildExprA[S, A]
 
-
   def buildExprA[S, A](expr: Expr[S, A]): String = expr match {
     case Annot(a, b) => buildExprB(a) + " : " + buildExprA(b)
     case Note(_, b) => buildExprA(b)
@@ -32,9 +31,13 @@ object PrettyPrinter {
     case Lam(a, b, c) => "λ(" + buildLabel(a) + " : " + buildExprA(b) + ") → " + buildExprB(c)
     case Quant("_", b, c) => buildExprC(b) + " → " + buildExprB(c)
     case Quant(a, b, c) => "∀(" + buildLabel(a) + " : " + buildExprA(b) + ") → " + buildExprB(c)
-    case BoolIf(a, b, c) => "if " + buildExprA(a) + " then " + buildExprB(b) + " else " + buildExprC(c)
-    case Let(a, None, c, d) => "let " + buildLabel(a) + " = " + buildExprA(c) + " in " + buildExprB(d)
-    case Let(a, Some(b), c, d) => "let " + buildLabel(a) + " : " + buildExprA(b) + " = " + buildExprA(c) + " in " + buildExprB(d)
+    case BoolIf(a, b, c) =>
+      "if " + buildExprA(a) + " then " + buildExprB(b) + " else " + buildExprC(c)
+    case Let(a, None, c, d) =>
+      "let " + buildLabel(a) + " = " + buildExprA(c) + " in " + buildExprB(d)
+    case Let(a, Some(b), c, d) =>
+      "let " + buildLabel(a) + " : " + buildExprA(b) + " = " + buildExprA(c) + " in " + buildExprB(
+        d)
     case ListLit(None, b) => "[" + buildElems(b.toList) + "]"
     case ListLit(Some(a), b) => "[" + buildElems(b.toList) + "] : List " + buildExprE(a)
     case OptionalLit(a, b) => "[" + buildElems(b.toList) + "] : Optional " + buildExprE(a)
@@ -145,7 +148,6 @@ object PrettyPrinter {
     case _ => "(" + buildExprA(expr) + ")"
   }
 
-
   def buildVar(vr: Var): String = vr match {
     case Var(x, 0) => buildLabel(x)
     case Var(x, n) => buildLabel(x) + "@" + buildNumber(n)
@@ -170,7 +172,6 @@ object PrettyPrinter {
 
   def buildFieldValue[S, A](fieldValue: (String, Expr[S, A])): String =
     buildLabel(fieldValue._1) + " = " + buildExprA(fieldValue._2)
-
 
   def buildRecord[S, A](mapping: Map[String, Expr[S, A]]): String = mapping.toList match {
     case List() => "{}"
@@ -200,61 +201,63 @@ object PrettyPrinter {
   def buildAlternativeType[S, A](altType: (String, Expr[S, A])): String =
     buildLabel(altType._1) + " : " + buildExprA(altType._2)
 
-  def buildUnionLit[S, A](t: String, e: Expr[S, A], mapping: Map[String, Expr[S, A]]): String = mapping.toList match {
-    case List() => "< " +
-      buildLabel(t) +
-      " = " +
-      buildExprA(e) +
-      " >"
-    case list => "< " +
-      buildLabel(t) +
-      " = " +
-      buildExprA(e) +
-      " | " +
-      buildAlternativeTypes(list) +
-      " >"
-  }
+  def buildUnionLit[S, A](t: String, e: Expr[S, A], mapping: Map[String, Expr[S, A]]): String =
+    mapping.toList match {
+      case List() =>
+        "< " +
+          buildLabel(t) +
+          " = " +
+          buildExprA(e) +
+          " >"
+      case list =>
+        "< " +
+          buildLabel(t) +
+          " = " +
+          buildExprA(e) +
+          " | " +
+          buildAlternativeTypes(list) +
+          " >"
+    }
 
   val reservedIdentifiers =
     Set(
-      "let"
-      , "in"
-      , "Type"
-      , "Kind"
-      , "forall"
-      , "Bool"
-      , "True"
-      , "False"
-      , "merge"
-      , "if"
-      , "then"
-      , "else"
-      , "as"
-      , "using"
-      , "Natural"
-      , "Natural/fold"
-      , "Natural/build"
-      , "Natural/isZero"
-      , "Natural/even"
-      , "Natural/odd"
-      , "Natural/toInteger"
-      , "Natural/show"
-      , "Integer"
-      , "Integer/show"
-      , "Double"
-      , "Double/show"
-      , "Text"
-      , "List"
-      , "List/build"
-      , "List/fold"
-      , "List/length"
-      , "List/head"
-      , "List/last"
-      , "List/indexed"
-      , "List/reverse"
-      , "Optional"
-      , "Optional/fold"
+      "let",
+      "in",
+      "Type",
+      "Kind",
+      "forall",
+      "Bool",
+      "True",
+      "False",
+      "merge",
+      "if",
+      "then",
+      "else",
+      "as",
+      "using",
+      "Natural",
+      "Natural/fold",
+      "Natural/build",
+      "Natural/isZero",
+      "Natural/even",
+      "Natural/odd",
+      "Natural/toInteger",
+      "Natural/show",
+      "Integer",
+      "Integer/show",
+      "Double",
+      "Double/show",
+      "Text",
+      "List",
+      "List/build",
+      "List/fold",
+      "List/length",
+      "List/head",
+      "List/last",
+      "List/indexed",
+      "List/reverse",
+      "Optional",
+      "Optional/fold"
     )
-
 
 }

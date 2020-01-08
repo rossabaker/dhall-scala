@@ -5,4 +5,3 @@ object TypeLevelFunctions {
     type Apply[B] = F[A, B]
   }
 }
-

@@ -5,8 +5,8 @@ import org.parboiled2._
 
 import scala.util.Try
 
-class DhallParser private[dhall](val input: ParserInput) extends Parser {
-
+class DhallParser private[dhall] (val input: ParserInput) extends Parser {
+  // format: off
   def InputLine: Rule1[Expr[Nothing, Path]] = rule {
     Expression ~ EOI
   }
@@ -96,10 +96,10 @@ class DhallParser private[dhall](val input: ParserInput) extends Parser {
   val WhiteSpaceChar = CharPredicate(" \n\r\t\f")
 
   def ws(toSurround: String): Rule0 = rule { zeroOrMore(WhiteSpaceChar) ~ toSurround ~ zeroOrMore(WhiteSpaceChar) }
+  // format: on
 }
 
 object DhallParser {
-  def parse(input: String): Try[Expr[Nothing, Path]] = {
+  def parse(input: String): Try[Expr[Nothing, Path]] =
     new DhallParser(input).InputLine.run()
-  }
 }

@@ -2,7 +2,6 @@ package dhall
 
 import org.specs2.mutable._
 
-
 import Expr._
 
 class ExprSpec extends Specification {
@@ -38,9 +37,17 @@ class ExprSpec extends Specification {
 
     "Var in Lam in Let" >> {
       // let x = True in \x: BoolType -> x && True
-      val given = Let("x", Some(BoolType), BoolLit(true), Lam("x", BoolType, BoolAnd(Var("x", 0), BoolLit(true))))
+      val given = Let(
+        "x",
+        Some(BoolType),
+        BoolLit(true),
+        Lam("x", BoolType, BoolAnd(Var("x", 0), BoolLit(true))))
       val shifted = given.shiftVariableIndices(1, Var("x", 0))
-      val expected = Let("x", Some(BoolType), BoolLit(true), Lam("x", BoolType, BoolAnd(Var("x", 1), BoolLit(true))))
+      val expected = Let(
+        "x",
+        Some(BoolType),
+        BoolLit(true),
+        Lam("x", BoolType, BoolAnd(Var("x", 1), BoolLit(true))))
       shifted mustEqual expected
     }
   }
@@ -74,7 +81,8 @@ class ExprSpec extends Specification {
       }
 
       "Let binding name" >> {
-        val given = Let("x", Some(BoolType), BoolLit(true), ListLit(None, Seq(Var("x", 0), BoolLit(false))))
+        val given =
+          Let("x", Some(BoolType), BoolLit(true), ListLit(None, Seq(Var("x", 0), BoolLit(false))))
         val substituted = given.substitute(Var("x", 0), BoolLit(true))
         substituted mustEqual given
       }
@@ -109,15 +117,29 @@ class ExprSpec extends Specification {
       "Combine" >> {
         val innerRecord1 = RecordLit(Map("y1" -> NaturalPlus(Var("x", 0), NaturalLit(1))))
         val innerRecord2 = RecordLit(Map("y2" -> NaturalTimes(Var("x", 0), NaturalLit(2))))
-        val expr1 = App(Lam("x", NaturalType, RecordLit(Map("x" -> Var("x", 0), "y" -> innerRecord1))), NaturalLit(1))
-        val expr2 = App(Lam("x", NaturalType, RecordLit(Map("z" -> Var("x", 0), "y" -> innerRecord2))), NaturalLit(2))
+        val expr1 = App(
+          Lam("x", NaturalType, RecordLit(Map("x" -> Var("x", 0), "y" -> innerRecord1))),
+          NaturalLit(1))
+        val expr2 = App(
+          Lam("x", NaturalType, RecordLit(Map("z" -> Var("x", 0), "y" -> innerRecord2))),
+          NaturalLit(2))
         val combined = Combine(expr1, expr2).normalize
-        combined mustEqual RecordLit(Map("y" -> RecordLit(Map("y1" -> NaturalLit(2), "y2" -> NaturalLit(4))), "x" -> NaturalLit(1), "z" -> NaturalLit(2)))
+        combined mustEqual RecordLit(
+          Map(
+            "y" -> RecordLit(Map("y1" -> NaturalLit(2), "y2" -> NaturalLit(4))),
+            "x" -> NaturalLit(1),
+            "z" -> NaturalLit(2)))
       }
 
       "Merge" >> {
-        val functions = RecordLit(Map("Left" -> Lam("y", NaturalType, App(NaturalIsZero, Var("y", 0))),
-                                      "Right" -> Lam("x", BoolType, Let("x", Some(BoolType), BoolLit(true), BoolAnd(Var("x", 0), BoolLit(true))))))
+        val functions = RecordLit(
+          Map(
+            "Left" -> Lam("y", NaturalType, App(NaturalIsZero, Var("y", 0))),
+            "Right" -> Lam(
+              "x",
+              BoolType,
+              Let("x", Some(BoolType), BoolLit(true), BoolAnd(Var("x", 0), BoolLit(true))))
+          ))
 
         val union1 = UnionLit("Left", NaturalLit(0), Map("Right" -> BoolType))
         val union2 = UnionLit("Right", BoolLit(false), Map("Left" -> NaturalType))
@@ -137,19 +159,23 @@ class ExprSpec extends Specification {
 
       "App " >> {
         "Lamda" >> {
-          App(Lam("x", NaturalType, NaturalTimes(Var("x", 0), Var("x", 0))), NaturalLit(2)).normalize mustEqual NaturalLit(4)
+          App(Lam("x", NaturalType, NaturalTimes(Var("x", 0), Var("x", 0))), NaturalLit(2)).normalize mustEqual NaturalLit(
+            4)
         }
 
         "ListBuild" >> {
           val ls =
             App(
               App(ListBuild, NaturalType),
-              Lam("l", Const.Type,
-                  Lam("cons",
-                      Quant("_", NaturalType,
-                            Quant("_", Var("l", 0), Var("l", 0))),
-                      Lam("nil", Var("l", 0),
-                          App(App(Var("cons", 0), NaturalLit(1)), Var("nil", 0))))))
+              Lam(
+                "l",
+                Const.Type,
+                Lam(
+                  "cons",
+                  Quant("_", NaturalType, Quant("_", Var("l", 0), Var("l", 0))),
+                  Lam("nil", Var("l", 0), App(App(Var("cons", 0), NaturalLit(1)), Var("nil", 0))))
+              )
+            )
 
           ls.normalize mustEqual ListLit(Some(NaturalType), Seq(NaturalLit(1)))
         }
@@ -161,39 +187,49 @@ class ExprSpec extends Specification {
                 App(
                   App(ListFold, NaturalType),
                   ListLit(Some(NaturalType), Seq(1, 2, 3, 4).map(NaturalLit(_)))),
-                Lam("x", NaturalType, Lam("y", NaturalType, NaturalPlus(Var("x", 0), Var("y", 0))))),
-              NaturalLit(0)).normalize
+                Lam("x", NaturalType, Lam("y", NaturalType, NaturalPlus(Var("x", 0), Var("y", 0))))
+              ),
+              NaturalLit(0)
+            ).normalize
 
           fold mustEqual NaturalLit(10)
         }
 
         "ListReverse" >> {
-          val reverseExpr = App(App(ListReverse, NaturalType), ListLit(None, Seq(1, 2, 3).map(NaturalLit(_))))
-          reverseExpr.normalize mustEqual ListLit(Some(NaturalType), Seq(3, 2, 1).map(NaturalLit(_)))
+          val reverseExpr =
+            App(App(ListReverse, NaturalType), ListLit(None, Seq(1, 2, 3).map(NaturalLit(_))))
+          reverseExpr.normalize mustEqual ListLit(
+            Some(NaturalType),
+            Seq(3, 2, 1).map(NaturalLit(_)))
         }
 
         "ListHead" >> {
-          val headExpr = App(App(ListHead, NaturalType), ListLit(None, Seq(1, 2).map(NaturalLit(_))))
+          val headExpr =
+            App(App(ListHead, NaturalType), ListLit(None, Seq(1, 2).map(NaturalLit(_))))
           headExpr.normalize mustEqual OptionalLit(NaturalType, Seq(NaturalLit(1)))
         }
 
         "ListLast" >> {
-          val lastExpr = App(App(ListLast, NaturalType), ListLit(None, Seq(1, 2).map(NaturalLit(_))))
+          val lastExpr =
+            App(App(ListLast, NaturalType), ListLit(None, Seq(1, 2).map(NaturalLit(_))))
           lastExpr.normalize mustEqual OptionalLit(NaturalType, Seq(NaturalLit(2)))
         }
 
         "ListLength" >> {
-          val lengthExpr = App(App(ListLength, NaturalType), ListLit(None, Seq(1, 2).map(NaturalLit(_))))
+          val lengthExpr =
+            App(App(ListLength, NaturalType), ListLit(None, Seq(1, 2).map(NaturalLit(_))))
           lengthExpr.normalize mustEqual NaturalLit(2)
         }
 
         "ListIndexed" >> {
-          val lengthExpr = App(App(ListIndexed, NaturalType), ListLit(None, Seq(1, 2).map(NaturalLit(_))))
+          val lengthExpr =
+            App(App(ListIndexed, NaturalType), ListLit(None, Seq(1, 2).map(NaturalLit(_))))
           val record = Record(Map("index" -> NaturalType, "value" -> NaturalType))
           val expected = ListLit(
             Some(record),
-            List(RecordLit(Map("index" -> NaturalLit(0), "value" -> NaturalLit(1))),
-                 RecordLit(Map("index" -> NaturalLit(1), "value" -> NaturalLit(2)))))
+            List(
+              RecordLit(Map("index" -> NaturalLit(0), "value" -> NaturalLit(1))),
+              RecordLit(Map("index" -> NaturalLit(1), "value" -> NaturalLit(2)))))
           lengthExpr.normalize mustEqual expected
         }
 
@@ -201,20 +237,30 @@ class ExprSpec extends Specification {
           val fold =
             App(
               App(
-                App(
-                  App(NaturalFold, NaturalLit(2)),
-                  NaturalType),
-                Lam("x", NaturalType,
-                    NaturalPlus(Var("x", 0), NaturalLit(15)))), NaturalLit(1))
+                App(App(NaturalFold, NaturalLit(2)), NaturalType),
+                Lam("x", NaturalType, NaturalPlus(Var("x", 0), NaturalLit(15)))),
+              NaturalLit(1))
           fold.normalize mustEqual NaturalLit(31)
         }
 
         "NaturalBuild" >> {
-          val ls = App(NaturalBuild,
-                       Lam("natural", Const.Type,
-                           Lam("succ", Quant("_", Var("natural", 0), Var("natural", 0)),
-                               Lam("zero", Var("natural", 0),
-                                   App(Var("succ", 0), App(Var("succ", 0), App(Var("succ", 0), App(Var("succ", 0), Var("zero", 0)))))))))
+          val ls = App(
+            NaturalBuild,
+            Lam(
+              "natural",
+              Const.Type,
+              Lam(
+                "succ",
+                Quant("_", Var("natural", 0), Var("natural", 0)),
+                Lam(
+                  "zero",
+                  Var("natural", 0),
+                  App(
+                    Var("succ", 0),
+                    App(Var("succ", 0), App(Var("succ", 0), App(Var("succ", 0), Var("zero", 0))))))
+              )
+            )
+          )
 
           ls.normalize mustEqual NaturalLit(4)
         }
@@ -237,9 +283,7 @@ class ExprSpec extends Specification {
             App(
               App(
                 App(
-                  App(
-                    App(OptionalFold, NaturalType),
-                    OptionalLit(NaturalType, value)),
+                  App(App(OptionalFold, NaturalType), OptionalLit(NaturalType, value)),
                   NaturalType),
                 Lam("x", NaturalType, Var("x", 0))),
               NaturalLit(0))
