@@ -256,7 +256,7 @@ sealed trait Expr[+S, +A] extends Product with Serializable {
       case App(function, arg) => {
         function.normalize match {
           // normalize ((\x -> f x) a) => normalize (f a)
-          case Lam(label, typExpr, bodyExpr) => bodyExpr.substitute(Var(label, 0), arg.shiftVariableIndices(1, Var(label, 0))).shiftVariableIndices(-1, Var(label, 0)).normalize
+          case Lam(label, _, bodyExpr) => bodyExpr.substitute(Var(label, 0), arg.shiftVariableIndices(1, Var(label, 0))).shiftVariableIndices(-1, Var(label, 0)).normalize
           case normalizedFunction => (normalizedFunction, arg.normalize) match {
             // normalize (List/build t ((List/fold t) e)) = normalize e
             case (App(ListBuild, _), App(App(ListFold, _), argument)) => argument.normalize
@@ -264,7 +264,7 @@ sealed trait Expr[+S, +A] extends Product with Serializable {
             case (NaturalBuild, App(NaturalFold, argument)) => argument.normalize
             case (NaturalFold, App(NaturalBuild, argument)) => argument.normalize
             // Natural/fold 2 Natural (+15) 1 = (15 + (15 + 1)) = 31
-            case (App(App(App(NaturalFold, (NaturalLit(n))), t), f), empty) => (1 to n).foldRight(empty)((_, acc) => App(f, acc)).normalize
+            case (App(App(App(NaturalFold, (NaturalLit(n))), _), f), empty) => (1 to n).foldRight(empty)((_, acc) => App(f, acc)).normalize
             case (NaturalBuild, v) => {
               val withLabels = App(App(App(v, NaturalType), Var("Succ", 0)), Var("Zero", 0)).normalize
               def normalized(e: Expr[S, A]): Boolean = Try(result(0, e)).toOption.fold[Boolean](false)(_ => true)
@@ -290,7 +290,7 @@ sealed trait Expr[+S, +A] extends Product with Serializable {
               }
               if(normalized(withLabels)) ListLit(Some(t), result(Nil, withLabels)) else App(normalizedFunction, v)
             }
-            case (App(App(App(ListFold, t), ListLit(_, ls)), f), seed) => ls.foldRight(seed)((e, acc) => App(App(f, e), acc)).normalize
+            case (App(App(App(ListFold, _), ListLit(_, ls)), f), seed) => ls.foldRight(seed)((e, acc) => App(App(f, e), acc)).normalize
             case (App(ListLength, _), ListLit(_, ls)) => NaturalLit(ls.size)
             case (App(ListHead, t), ListLit(_, ls)) => OptionalLit(t, ls.headOption.toList).normalize
             case (App(ListLast, t), ListLit(_, ls)) => OptionalLit(t, ls.lastOption.toList).normalize
@@ -299,7 +299,7 @@ sealed trait Expr[+S, +A] extends Product with Serializable {
               ListLit(Some(typ), ls.zipWithIndex.map{ case (v, i) => RecordLit(Map("index" -> NaturalLit(i), "value" -> v))}).normalize
             }
             case (App(ListReverse, t), ListLit(_, ls)) => ListLit(Some(t), ls.reverse).normalize
-            case (App(App(App(App(OptionalFold, t), OptionalLit(_, ls)), _), some), none) => ls.headOption.fold(none)(App(some, _)).normalize
+            case (App(App(App(App(OptionalFold, _), OptionalLit(_, ls)), _), some), none) => ls.headOption.fold(none)(App(some, _)).normalize
             case (n, v) => App(n, v)
           }
         }

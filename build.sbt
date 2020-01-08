@@ -8,7 +8,3 @@ libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-core" % "2.1.0",
   "org.parboiled" %% "parboiled" % "2.1.8"
 )
-
-scalacOptions ++= Seq(
-  "-language:higherKinds"
-)
